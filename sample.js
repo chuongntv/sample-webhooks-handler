@@ -57,7 +57,7 @@ var postRoutes = {
     }
 
     if (eventType === 'setstatus') {
-        currentVirtualLightStatus = eventData.status
+        currentVirtualLightStatus = eventData.status || false
     }
 
     console.log(json);
@@ -147,12 +147,12 @@ function webMainLoop(req, res) {
     }
   } else if (req.method = 'GET') {
     var handler = getRoutes[path];
-    if (handler) {
-      executeHandler(req, res, handler);
-    } else {
+    if (handler === undefined) {
       var data = doc1;
       res.write(data + requestData.join("<br/>") + doc2);
       res.end();
+    } else {
+      executeHandler(req, res, handler);
     }
   }
 }

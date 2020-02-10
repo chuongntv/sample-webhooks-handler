@@ -110,11 +110,9 @@ function executeHandler(req, res, handler) {
 var doc1 = `
 <html>
 <body>
-<h1>
 `;
 
 var doc2 = `
-</h1>
 <script>
 setInterval(function() { location.reload(); }, 1000);
 </script>
@@ -124,7 +122,7 @@ setInterval(function() { location.reload(); }, 1000);
 
 function webMainLoop(req, res) {
   var path = url.parse(req.url, true).pathname;
-  var data = "";
+  var data = doc1;
   if (req.method == 'POST') {
     var handler = postRoutes[path];
     if (handler === undefined) {
@@ -135,15 +133,15 @@ function webMainLoop(req, res) {
   } else if (req.method = 'GET') {
     res.writeHeader(200, {"Content-Type": "text/html"});
     if (lastDeviceEventJson === null) {
-      data = doc1 + "No device event.\n";
+      data = data + "No device event.\n";
     } else {
-      data = doc1 + JSON.stringify(lastDeviceEventJson);
+      data = data + JSON.stringify(lastDeviceEventJson) + "\n";
     }
 
     if (lastDeviceCommandJson === null) {
-      data = doc1 + "No device command.\n";
+      data = data + "No device command.\n" ;
     } else {
-      data = doc1 + JSON.stringify(lastDeviceCommandJson);
+      data = data + JSON.stringify(lastDeviceCommandJson) + "\n";
     }
     res.write(data + doc2);
     res.end();

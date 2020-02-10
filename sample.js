@@ -11,8 +11,8 @@ function eventWebhookError(res, statusCode, errMsg) {
   res.end();
 }
 
-function checkWebhookSignature(_url, body, signature) {
-  var hmac = crypto.createHmac('sha256', evt_key)
+function checkWebhookSignature(_url, body, signature, key) {
+  var hmac = crypto.createHmac('sha256', key)
   hmac.update(_url + body);
   var h = hmac.digest('hex');
   return signature == h
@@ -27,7 +27,42 @@ var postRoutes = {
   // webhook endpoint
   "/evt" : function(req, res, body) {
     var sig = req.headers['x-mode-signature'];
-    if (!checkWebhookSignature(evt_url, body, sig)) {
+    if (!checkWebhookSignature(evt_url, body, sig, evt_key)) {
+      eventWebhookError(res, 403, "Signature doesn't match: " + sig);
+      return;
+    }
+
+    var json;
+    try {
+      json = JSON.parse(body);
+    } catch (e) {
+      json = null;
+    }
+
+    if (!json) {
+      eventWebhookError(res, 400, "Request body is not valid JSON");
+      return;
+    }
+
+    var origin = json['originDeviceId'];
+    var eventType = json['eventType'];
+    var eventData = json['eventData'];
+
+    if (!eventType) {
+      eventWebhookError(res, 400, "Invalid event object");
+      return;
+    }
+
+    console.log(json);
+    lastDeviceEventJson = json;
+
+    res.writeHeader(200, {"Content-Type": "text/plain"});
+    res.write("Event received.\n");
+    res.end();
+  },
+  "/cmd" : function(req, res, body) {
+    var sig = req.headers['x-mode-signature'];
+    if (!checkWebhookSignature(cmd_url, body, sig, cmd_key)) {
       eventWebhookError(res, 403, "Signature doesn't match: " + sig);
       return;
     }
@@ -119,6 +154,8 @@ function webMainLoop(req, res) {
 var app_port = process.env.PORT || 8000;
 var evt_url = process.env.EVENT_URL;
 var evt_key = process.env.EVENT_KEY;
+var cmd_url = process.env.COMMAND_URL;
+var cmd_key = process.env.COMMAND_KEY;
 
 http.createServer(function(req, res){  
   webMainLoop(req, res);

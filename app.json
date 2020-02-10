@@ -4,5 +4,9 @@
   "env": {
     "EVENT_KEY": "(YOUR_EVENT_WEBHOOK_KEY)",
     "EVENT_URL": "https://(YOUR_APP_NAME).herokuapp.com/evt"
+  },
+  "cmd": {
+    "COMMAND_KEY": "(YOUR_EVENT_WEBHOOK_KEY)",
+    "EVENT_URL": "https://(YOUR_APP_NAME).herokuapp.com/cmd"
   }
 }

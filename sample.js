@@ -19,6 +19,7 @@ function checkWebhookSignature(_url, body, signature, key) {
 }
 
 var lastDeviceEventJson = null;
+var lastDeviceCommandJson = null;
 
 //
 // Routing
@@ -54,7 +55,7 @@ var postRoutes = {
     }
 
     console.log(json);
-    lastDeviceEventJson = json;
+    lastDeviceEventJson = lastDeviceEventJson + json;;
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
     res.write("Event received.\n");
@@ -79,20 +80,11 @@ var postRoutes = {
       return;
     }
 
-    var origin = json['originDeviceId'];
-    var eventType = json['eventType'];
-    var eventData = json['eventData'];
-
-    if (!eventType) {
-      eventWebhookError(res, 400, "Invalid event object");
-      return;
-    }
-
     console.log(json);
-    lastDeviceEventJson = json;
+    lastDeviceCommandJson = lastDeviceCommandJson + json;
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
-    res.write("Event received.\n");
+    res.write("Command received.\n");
     res.end();
   }
 };
@@ -132,7 +124,7 @@ setInterval(function() { location.reload(); }, 1000);
 
 function webMainLoop(req, res) {
   var path = url.parse(req.url, true).pathname;
-
+  var data = "";
   if (req.method == 'POST') {
     var handler = postRoutes[path];
     if (handler === undefined) {
@@ -143,10 +135,17 @@ function webMainLoop(req, res) {
   } else if (req.method = 'GET') {
     res.writeHeader(200, {"Content-Type": "text/html"});
     if (lastDeviceEventJson === null) {
-      res.write(doc1 + "No device event.\n" + doc2);
+      data = doc1 + "No device event.\n";
     } else {
-      res.write(doc1 + JSON.stringify(lastDeviceEventJson) + doc2);
+      data = doc1 + JSON.stringify(lastDeviceEventJson);
     }
+
+    if (lastDeviceCommandJson === null) {
+      data = doc1 + "No device command.\n";
+    } else {
+      data = doc1 + JSON.stringify(lastDeviceCommandJson);
+    }
+    res.write(data + doc2);
     res.end();
   }
 }

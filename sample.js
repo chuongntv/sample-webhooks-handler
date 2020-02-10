@@ -20,6 +20,7 @@ function checkWebhookSignature(_url, body, signature, key) {
 
 var lastDeviceEventJson = null;
 var lastDeviceCommandJson = null;
+var currentVirtualLightStatus = false;
 var requestData = [];
 
 //
@@ -53,6 +54,10 @@ var postRoutes = {
     if (!eventType) {
       eventWebhookError(res, 400, "Invalid event object");
       return;
+    }
+
+    if (eventType === 'setstatus') {
+        currentVirtualLightStatus = eventData.status
     }
 
     console.log(json);
@@ -92,6 +97,14 @@ var postRoutes = {
   }
 };
 
+var getRoutes = {
+  "/status" : function(req, res, body) {
+    res.writeHeader(200, {"Content-Type": "application/json"});
+    res.write(`{"status": "${currentVirtualLightStatus}"}`);
+    res.end();
+  }
+};
+
 function handlerNotFound(res, path) {
   res.writeHeader(404, {"Content-Type": "text/plain"});
   res.write("Not Found\n");
@@ -117,7 +130,7 @@ var doc1 = `
 
 var doc2 = `
 <script>
-setInterval(function() { location.reload(); }, 1000);
+setInterval(function() { location.reload(); }, 3000);
 </script>
 </body>
 </html>
@@ -133,21 +146,14 @@ function webMainLoop(req, res) {
       executeHandler(req, res, handler);
     }
   } else if (req.method = 'GET') {
-    var data = doc1;
-    // res.writeHeader(200, {"Content-Type": "text/html"});
-    // if (lastDeviceEventJson === null) {
-    //   data = data + "No device event.\n";
-    // } else {
-    //   data = data + JSON.stringify(lastDeviceEventJson) + "<br/>";
-    // }
-
-    // if (lastDeviceCommandJson === null) {
-    //   data = data + "No device command.\n" ;
-    // } else {
-    //   data = data + JSON.stringify(lastDeviceCommandJson) + "<br/>";
-    // }
-    res.write(data + requestData.join("<br/>") + doc2);
-    res.end();
+    var handler = getRoutes[path];
+    if (handler) {
+      executeHandler(req, res, handler);
+    } else {
+      var data = doc1;
+      res.write(data + requestData.join("<br/>") + doc2);
+      res.end();
+    }
   }
 }
 

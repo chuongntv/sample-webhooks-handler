@@ -57,7 +57,7 @@ var postRoutes = {
 
     console.log(json);
     lastDeviceEventJson = json;
-    requestData.push(json);
+    requestData.push(body);
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
     res.write("Event received.\n");
@@ -84,7 +84,7 @@ var postRoutes = {
 
     console.log(json);
     lastDeviceCommandJson = json;
-    requestData.push(json);
+    requestData.push(body);
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
     res.write("Command received.\n");

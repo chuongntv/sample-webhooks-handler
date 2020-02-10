@@ -56,7 +56,7 @@ var postRoutes = {
       return;
     }
 
-    if (eventType === 'setstatus') {
+    if (eventType === 'set_status') {
         currentVirtualLightStatus = eventData.status || false
     }
 

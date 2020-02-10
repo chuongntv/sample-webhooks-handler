@@ -164,5 +164,14 @@ var cmd_url = process.env.COMMAND_URL;
 var cmd_key = process.env.COMMAND_KEY;
 
 http.createServer(function(req, res){  
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Request-Method', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  if ( req.method === 'OPTIONS' ) {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
   webMainLoop(req, res);
 }).listen(app_port);

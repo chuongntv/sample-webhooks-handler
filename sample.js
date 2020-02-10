@@ -55,7 +55,7 @@ var postRoutes = {
     }
 
     console.log(json);
-    lastDeviceEventJson = lastDeviceEventJson + json;;
+    lastDeviceEventJson = json;
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
     res.write("Event received.\n");
@@ -81,7 +81,7 @@ var postRoutes = {
     }
 
     console.log(json);
-    lastDeviceCommandJson = lastDeviceCommandJson + json;
+    lastDeviceCommandJson = json;
 
     res.writeHeader(200, {"Content-Type": "text/plain"});
     res.write("Command received.\n");
@@ -122,7 +122,6 @@ setInterval(function() { location.reload(); }, 1000);
 
 function webMainLoop(req, res) {
   var path = url.parse(req.url, true).pathname;
-  var data = doc1;
   if (req.method == 'POST') {
     var handler = postRoutes[path];
     if (handler === undefined) {
@@ -131,17 +130,18 @@ function webMainLoop(req, res) {
       executeHandler(req, res, handler);
     }
   } else if (req.method = 'GET') {
+    var data = doc1;
     res.writeHeader(200, {"Content-Type": "text/html"});
     if (lastDeviceEventJson === null) {
       data = data + "No device event.\n";
     } else {
-      data = data + JSON.stringify(lastDeviceEventJson) + "\n";
+      data = data + JSON.stringify(lastDeviceEventJson) + "<br/>";
     }
 
     if (lastDeviceCommandJson === null) {
       data = data + "No device command.\n" ;
     } else {
-      data = data + JSON.stringify(lastDeviceCommandJson) + "\n";
+      data = data + JSON.stringify(lastDeviceCommandJson) + "<br/>";
     }
     res.write(data + doc2);
     res.end();
